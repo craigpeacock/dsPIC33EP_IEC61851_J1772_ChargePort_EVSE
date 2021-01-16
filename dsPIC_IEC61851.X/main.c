@@ -48,10 +48,25 @@ int main(void) {
     CP_SetAmps(10.0);
     
     while (1) {
-        printf("Sending CAN Message\r\n");
-        CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
+        //printf("Sending CAN Message\r\n");
+        //CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
+        
+        if (C1RXFUL1bits.RXFUL8) {
+            uint8_t DLC = ecan1_msgbuf[8][2] & 0xF;
+            uint16_t SID = (ecan1_msgbuf[8][0] >> 2) & 0x7FF;
+            printf("0x%03X [%d] ",SID,DLC);
+
+            uint8_t buffer[8];
+            memcpy(buffer, &ecan1_msgbuf[8][3], DLC);
+
+            int i;
+            for (i = 0; i < DLC; i++)
+                printf("%02X ",buffer[i]);
+            printf("\r\n");
+
+            C1RXFUL1bits.RXFUL8 = 0;
+        }
     }
-     
     return 0;
 }
 
