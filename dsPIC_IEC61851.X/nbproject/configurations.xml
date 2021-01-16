@@ -7,6 +7,7 @@
       <itemPath>board.h</itemPath>
       <itemPath>pwm.h</itemPath>
       <itemPath>inputcapture.h</itemPath>
+      <itemPath>can.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -19,6 +20,7 @@
       <itemPath>main.c</itemPath>
       <itemPath>pwm.c</itemPath>
       <itemPath>inputcapture.c</itemPath>
+      <itemPath>can.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

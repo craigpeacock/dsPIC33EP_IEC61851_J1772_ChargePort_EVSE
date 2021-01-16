@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "board.h"
 #include "pwm.h"
 #include "inputcapture.h"
+#include "can.h"
 
 int main(void) {
     
@@ -33,7 +34,10 @@ int main(void) {
     Init_UART();
     Init_PWM();
     Init_InputCapture();
+    Init_CAN1();
     
+    uint8_t buffer[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+   
     ANSELE = 0x0;           // Use PORTE as digital IO
     TRISEbits.TRISE1 = 1;	// E1 is input for InputCapture
 
@@ -44,7 +48,8 @@ int main(void) {
     CP_SetAmps(10.0);
     
     while (1) {
-        
+        printf("Sending CAN Message\r\n");
+        CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
     }
      
     return 0;
