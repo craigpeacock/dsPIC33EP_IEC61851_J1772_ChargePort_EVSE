@@ -18,12 +18,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "xc.h"
 #include "board.h"
 #include "inputcapture.h"
 
 unsigned int t_on;
 unsigned int period;
+bool active;
 
 void Init_InputCapture(void)
 {
@@ -46,7 +48,6 @@ void Init_InputCapture(void)
      *
      */    
     
-    ANSELA = 0;
     TRISAbits.TRISA4 = 1;           // A4 is input for InputCapture
     CNPUAbits.CNPUA4 = 1;           // Enable weak pull-up
     
@@ -70,6 +71,8 @@ void Init_InputCapture(void)
     IC2CON1bits.ICM = 0b011;        // Generate capture event on rising edge
     IC2CON2bits.ICTRIG = 0;         // Operate timer in Sync mode
     IC2CON2bits.SYNCSEL = 0b10000;  // Sync on IC1 event
+
+    active = false;
     
     IFS0bits.IC1IF = 0;             // Clear the IC1 interrupt status flag
     IFS0bits.IC2IF = 0;             // Clear the IC2 interrupt status flag
@@ -93,11 +96,57 @@ void __attribute__ ((__interrupt__, no_auto_psv)) _IC2Interrupt(void)
     // IC2BUF holds duration of negative pulse
     t_on = IC1BUF;
     period = IC1BUF + IC2BUF;
- 
-    // printf statements only for debugging. Shouldn't be called from ISR.
-    //printf("IC1BUF = 0x%04X IC2BUF = 0x%04X ",IC1BUF, IC2BUF);
-    printf("Duty Cycle = %.1f%% ", (t_on * 100.0) / period);
-    printf("Frequency %.1fHz \r\n", 1 / (period * 0.000000025));
-    
+    active = true;
+
     IFS0bits.IC2IF = 0; // Reset respective interrupt flag
+}
+
+int Get_CP_ChargeRate(void)
+{
+    unsigned int DutyCycle;
+    int ChargeRateAmps = 0;
+    
+    //printf("Frequency %.1fHz \r\n", 1 / (period * 0.000000025));
+    //printf("Duty Cycle = %.1f%% ", (t_on * 100.0) / period);
+    
+    if (active) {
+        active = false;
+        // Check period 
+        // IEC 61851 requires 1kHz signal to be within +/- 0.5%
+        // 995Hz = 40201 25nS counts, 1005Hz = 39801 25nS counts
+        if ((period >= 39801) & (period <= 40201)) {
+            // CP Frequency is acceptable, check duty cycle
+            // DutyCycle is in tenths of percent.
+            DutyCycle = (t_on / 40);
+            //printf("Duty Cycle %u\r\n", DutyCycle);
+
+            if (DutyCycle < 30) {
+                // Charging not allowed
+                ChargeRateAmps = CP_ERROR;
+            } else if (DutyCycle < 70) {
+                // Digital Comms
+                ChargeRateAmps = CP_REQ_DIGITAL_MODE;
+            } else if (DutyCycle < 80) {
+                // Charging not allowed
+                ChargeRateAmps = CP_ERROR;
+            } else if (DutyCycle < 100) {
+                ChargeRateAmps = 600;
+            } else if (DutyCycle < 850) {
+                // Available current = (% duty cycle) x 0.6 A
+                ChargeRateAmps = DutyCycle * 6;
+            } else if (DutyCycle < 960) {
+                // Available current = (% duty cycle - 64) x 2.5 A
+                ChargeRateAmps = (DutyCycle - 640) * 25;
+            } else if (DutyCycle < 970) {
+                ChargeRateAmps = 8000;
+            } else {
+                // Over 97%, Charging not allowed
+                ChargeRateAmps = CP_ERROR;
+            }
+        } else {
+            //printf("Warning: Control Pilot frequency out of spec\r\n");
+            ChargeRateAmps = CP_ERROR;
+        }
+    }
+    return (ChargeRateAmps);
 }

@@ -20,20 +20,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
 
-#define LED1 	LATEbits.LATE0
-#define LED2	LATEbits.LATE1
-#define LED3 	LATEbits.LATE2
-#define LED4	LATEbits.LATE3
+#define LED1            LATCbits.LATC9
+#define LED2            LATCbits.LATC10
 
-#define SW1 	PORTEbits.RE4
-#define SW2     PORTEbits.RE5
-#define SW3     PORTEbits.RE6
-#define SW4     PORTEbits.RE7
+#define LED1_DIR        TRISCbits.TRISC9
+#define LED2_DIR        TRISCbits.TRISC10
 
-#define INA     LATDbits.LATD8
-#define INB     LATDbits.LATD9
-#define INA_DIR TRISDbits.TRISD8
-#define INB_DIR TRISDbits.TRISD9
+#define LED1_ANSEL      ANSELCbits.ANSC9
+#define LED2_ANSEL      ANSELCbits.ANSC10
+
+#define CHARGE_EN       LATAbits.LATA3
+#define CHARGE_EN_DIR   TRISAbits.TRISA3
+
+#define SWCAN_EN        LATAbits.RA1
 
 void Init_PLL(void);
 void Init_AUXPLL(void);

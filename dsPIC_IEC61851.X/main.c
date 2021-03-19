@@ -30,40 +30,88 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "inputcapture.h"
 #include "can.h"
 
+enum STATE {
+    IDLE,
+    ERROR,
+    REQ_DIGITAL_COMMS,
+    PWM_CHARGING,
+    DISCONNECT
+};
+
 int main(void) {
-    TRISCbits.TRISC9 = 0;	
-    TRISCbits.TRISC10 = 0;
-    ANSELCbits.ANSC9 = 0;
-    ANSELCbits.ANSC10 = 0;
+   
+    // Setup GPIO
+    LED1_ANSEL = 0;
+    LED2_ANSEL = 0;
     
-    LATCbits.LATC9 = 1;
-    LATCbits.LATC10 = 1;
-       
-    Init_PLL();             // Initialise System Clock/PLL
+    LED1 = 0;
+    LED2 = 0;
+        
+    LED1_DIR = 0;
+    LED2_DIR = 0;
+    
+    CHARGE_EN = 0;
+    CHARGE_EN_DIR = 0;
+      
+    Init_PLL();             
     Init_UART();
-    Init_PWM();
     Init_InputCapture();
     Init_CAN1();
-    
-    uint8_t buffer[] = { 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
-    
+   
     printf("\r\ndsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code\r\n");
-
-    printf("Generating 1kHz Control Pilot Signal\r\n");
-    CP_SetAmps(10.0);
+    
+    unsigned int ChargeRate;
+    enum STATE state = IDLE;
     
     while (1) {
-        printf("Sending CAN Message\r\n");
-        CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
         
-        LATCbits.LATC9 = 1;
-        __delay_ms(200);
-        LATCbits.LATC9 = 0;
-        __delay_ms(200);
+        ChargeRate = Get_CP_ChargeRate();
+        if (ChargeRate == CP_ERROR) state = ERROR;
+        else if (ChargeRate == CP_REQ_DIGITAL_MODE) state = REQ_DIGITAL_COMMS;
         
+        switch (state) {
+            
+            case IDLE:
+                printf("Idle\r\n");
+                if (ChargeRate >= 600) state = PWM_CHARGING;
+                break;
+            
+            case ERROR:
+                printf("Error\r\n");
+                state = IDLE;
+                break;
+
+            case REQ_DIGITAL_COMMS:
+                // Request for digital comms on control pilot.
+                printf("Requesting Digital Communication\r\n");
+                // Do nothing at this stage
+                state = IDLE;
+                break;
+            
+            case PWM_CHARGING:
+                if (ChargeRate == 0) state = DISCONNECT;
+                else {
+                    printf("Maximum Charge Rate %u.%01uA\r\n", ChargeRate / 100, ChargeRate % 100);
+                    CHARGE_EN = 1;
+                    // Communicate with our charger here
+                }
+                break;
+                
+            case DISCONNECT:
+                // Request to stop charging and disconnect
+                printf("Preparing for disconnect\r\n");
+                // Tell our charger to stop pulling current
+                
+                // Stop charging
+                CHARGE_EN = 0;      
+
+                // Unlock chargeport
+
+                state = IDLE;
+                break;
+        }
+        
+        LED1 = ~LED1;
+        __delay_ms(100);
     }
 }
-
-
-
-

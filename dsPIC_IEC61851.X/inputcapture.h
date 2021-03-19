@@ -24,6 +24,11 @@ void Init_InputCapture(void);
 void __attribute__ ((__interrupt__, no_auto_psv)) _IC1Interrupt(void);
 void __attribute__ ((__interrupt__, no_auto_psv)) _IC2Interrupt(void);
 
+#define CP_ERROR            -1
+#define CP_REQ_DIGITAL_MODE -2
+
+int Get_CP_ChargeRate(void);
+
 extern unsigned int t_on;
 extern unsigned int period;
 
