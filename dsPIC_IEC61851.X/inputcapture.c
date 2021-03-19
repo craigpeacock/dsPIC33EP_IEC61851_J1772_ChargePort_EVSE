@@ -1,5 +1,5 @@
 /*
-dsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code
+dsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code
 Copyright (C) 2021 Craig Peacock
 
 This program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ unsigned int period;
 void Init_InputCapture(void)
 {
     /* 
-     * Measure Duty Cycle of 1kHz Control Pilot Signal connected to RE1.
+     * Measure Duty Cycle of 1kHz Control Pilot Signal connected to RP20/RA4.
      * 
      * To do this, we use two Input Compare modules connected to the same source. 
      * One (IC1) is tasked with measuring the positive cycle and the other (IC2) 
@@ -44,11 +44,15 @@ void Init_InputCapture(void)
      * no divisor. Hence 1 count represents 25nS. The 16 bit register can record 
      * a pulse length of 1.63mS before rolling over.  
      *
-     */       
+     */    
+    
+    ANSELA = 0;
+    TRISAbits.TRISA4 = 1;           // A4 is input for InputCapture
+    CNPUAbits.CNPUA4 = 1;           // Enable weak pull-up
     
     __builtin_write_OSCCONL(OSCCON & ~(1<<6));  // Unlock Peripheral Pin Select Registers
-    RPINR7bits.IC1R = 81;                       // RE1
-    RPINR7bits.IC2R = 81;                       // RE1
+    RPINR7bits.IC1R = 20;                       // RP20/RA4
+    RPINR7bits.IC2R = 20;                       // RP20/RA4
     __builtin_write_OSCCONL(OSCCON | (1<<6));   // Lock Peripheral Pin Select Registers
 
     // Input Compare 1 - Positive Cycle

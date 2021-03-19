@@ -1,5 +1,5 @@
 /*
-dsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code
+dsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code
 Copyright (C) 2021 Craig Peacock
 
 This program is free software; you can redistribute it and/or
@@ -33,17 +33,19 @@ unsigned int ecan1_msgbuf[NUM_OF_CAN_BUFFERS][8] __attribute__((aligned(NUM_OF_C
 
 void Init_CAN1(void)
 {
+    ANSELBbits.ANSB5 = 0;
+    
     // Set up re-mappable I/O
     __builtin_write_OSCCONL(OSCCON & ~(1<<6));  // Unlock Peripheral Pin Select Registers
-    RPINR26bits.C1RXR = 66;                     // Input: Assign CAN1 RX to RP66/RD2
-    RPOR1bits.RP67R = 14;                       // Output: Assign CAN1 TX to RP67/RD3
+    RPINR26bits.C1RXR = 47;                     // Input: Assign CAN1 RX to RP47/RB15
+    RPOR5bits.RP37R = 14;                       // Output: Assign CAN1 TX to RP37/RB5
     __builtin_write_OSCCONL(OSCCON | (1<<6));   // Lock Peripheral Pin Select Registers
     
     // ECAN module must be configuration mode to set baud rate registers
     C1CTRL1bits.REQOP = 4;                      // Request configuration mode
     while( C1CTRL1bits.OPMODE != 4 );           // Check operation mode 
        
-    // Set ECAN module for 500kbps speed with 10 Tq per bit
+    // Set ECAN module for 250kbps speed with 10 Tq per bit
     C1CFG1 = 0x47;                              // BRP = 8 SJW = 2 Tq
     C1CFG2 = 0x2D2;
     

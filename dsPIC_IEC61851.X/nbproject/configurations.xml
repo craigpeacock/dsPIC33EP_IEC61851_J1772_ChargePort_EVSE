@@ -36,7 +36,7 @@
     <conf name="default" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>dsPIC33EP256MU806</targetDevice>
+        <targetDevice>dsPIC33EP128GS804</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
@@ -45,7 +45,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.3.85"/>
+        <pack name="dsPIC33E-GS_DFP" vendor="Microchip" version="1.3.91"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -201,72 +201,43 @@
         <property key="save-temps" value="false"/>
       </C30Global>
       <ICD3PlatformTool>
-        <property key="ADC 1" value="true"/>
-        <property key="ADC 2" value="true"/>
+        <property key="ADFRZ" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="COMPARATOR" value="true"/>
-        <property key="CRC" value="true"/>
-        <property key="DCI" value="true"/>
+        <property key="CLC 1" value="true"/>
+        <property key="CLC 2" value="true"/>
+        <property key="CLC 3" value="true"/>
+        <property key="CLC 4" value="true"/>
+        <property key="Comparator 1" value="true"/>
+        <property key="Comparator 2" value="true"/>
+        <property key="Comparator 3" value="true"/>
+        <property key="Comparator 4" value="true"/>
         <property key="Freeze All Other Peripherals" value="true"/>
-        <property key="I2C1" value="true"/>
-        <property key="I2C2" value="true"/>
+        <property key="I2C 1" value="true"/>
+        <property key="I2C 2" value="true"/>
         <property key="INPUT CAPTURE 1" value="true"/>
-        <property key="INPUT CAPTURE 10" value="true"/>
-        <property key="INPUT CAPTURE 11" value="true"/>
-        <property key="INPUT CAPTURE 12" value="true"/>
-        <property key="INPUT CAPTURE 13" value="true"/>
-        <property key="INPUT CAPTURE 14" value="true"/>
-        <property key="INPUT CAPTURE 15" value="true"/>
-        <property key="INPUT CAPTURE 16" value="true"/>
         <property key="INPUT CAPTURE 2" value="true"/>
         <property key="INPUT CAPTURE 3" value="true"/>
         <property key="INPUT CAPTURE 4" value="true"/>
-        <property key="INPUT CAPTURE 5" value="true"/>
-        <property key="INPUT CAPTURE 6" value="true"/>
-        <property key="INPUT CAPTURE 7" value="true"/>
-        <property key="INPUT CAPTURE 8" value="true"/>
-        <property key="INPUT CAPTURE 9" value="true"/>
         <property key="OUTPUT COMPARE 1" value="true"/>
-        <property key="OUTPUT COMPARE 10" value="true"/>
-        <property key="OUTPUT COMPARE 11" value="true"/>
-        <property key="OUTPUT COMPARE 12" value="true"/>
-        <property key="OUTPUT COMPARE 13" value="true"/>
-        <property key="OUTPUT COMPARE 14" value="true"/>
-        <property key="OUTPUT COMPARE 15" value="true"/>
-        <property key="OUTPUT COMPARE 16" value="true"/>
         <property key="OUTPUT COMPARE 2" value="true"/>
         <property key="OUTPUT COMPARE 3" value="true"/>
         <property key="OUTPUT COMPARE 4" value="true"/>
-        <property key="OUTPUT COMPARE 5" value="true"/>
-        <property key="OUTPUT COMPARE 6" value="true"/>
-        <property key="OUTPUT COMPARE 7" value="true"/>
-        <property key="OUTPUT COMPARE 8" value="true"/>
-        <property key="OUTPUT COMPARE 9" value="true"/>
-        <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
+        <property key="PTG" value="true"/>
         <property key="PWM" value="true"/>
-        <property key="REAL TIME CLOCK AND CALENDAR" value="true"/>
         <property key="SPI 1" value="true"/>
         <property key="SPI 2" value="true"/>
         <property key="SPI 3" value="true"/>
-        <property key="SPI 4" value="true"/>
         <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
         <property key="TIMER1" value="true"/>
         <property key="TIMER2" value="true"/>
         <property key="TIMER3" value="true"/>
         <property key="TIMER4" value="true"/>
         <property key="TIMER5" value="true"/>
-        <property key="TIMER6" value="true"/>
-        <property key="TIMER7" value="true"/>
-        <property key="TIMER8" value="true"/>
-        <property key="TIMER9" value="true"/>
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="UART 1" value="true"/>
         <property key="UART 2" value="true"/>
-        <property key="UART 3" value="true"/>
-        <property key="UART 4" value="true"/>
-        <property key="USB" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>

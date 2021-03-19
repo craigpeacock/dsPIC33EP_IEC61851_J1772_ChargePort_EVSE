@@ -1,5 +1,5 @@
 /*
-dsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code
+dsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code
 Copyright (C) 2021 Craig Peacock
 
 This program is free software; you can redistribute it and/or

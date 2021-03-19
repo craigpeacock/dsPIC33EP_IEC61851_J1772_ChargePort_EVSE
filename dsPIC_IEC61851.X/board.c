@@ -1,5 +1,5 @@
 /*
-dsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code
+dsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code
 Copyright (C) 2021 Craig Peacock
 
 This program is free software; you can redistribute it and/or
@@ -23,52 +23,70 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "xc.h"
 #include "board.h"
 
-// FGS
+// FSEC
+#pragma config BWRP = OFF               // Boot Segment Write-Protect bit (Boot Segment may be written)
+#pragma config BSS = DISABLED           // Boot Segment Code-Protect Level bits (No Protection (other than BWRP))
+#pragma config BSEN = OFF               // Boot Segment Control bit (No Boot Segment)
 #pragma config GWRP = OFF               // General Segment Write-Protect bit (General Segment may be written)
-#pragma config GSS = OFF                // General Segment Code-Protect bit (General Segment Code protect is disabled)
-#pragma config GSSK = OFF               // General Segment Key bits (General Segment Write Protection and Code Protection is Disabled)
+#pragma config GSS = DISABLED           // General Segment Code-Protect Level bits (No Protection (other than GWRP))
+#pragma config CWRP = OFF               // Configuration Segment Write-Protect bit (Configuration Segment may be written)
+#pragma config CSS = DISABLED           // Configuration Segment Code-Protect Level bits (No Protection (other than CWRP))
+#pragma config AIVTDIS = OFF            // Alternate Interrupt Vector Table bit (Disabled AIVT)
+
+// FBSLIM
+#pragma config BSLIM = 0x1FFF           // Boot Segment Flash Page Address Limit bits (Enter Hexadecimal value)
+
+// FSIGN
 
 // FOSCSEL
-#pragma config FNOSC = FRC              // Initial Oscillator Source Selection bits (Internal Fast RC (FRC))
+#pragma config FNOSC = FRC              // Oscillator Source Selection (Primary Oscillator (XT, HS, EC))
 #pragma config IESO = ON                // Two-speed Oscillator Start-up Enable bit (Start up device with FRC, then switch to user-selected oscillator source)
 
 // FOSC
-#pragma config POSCMD = XT              // Primary Oscillator Mode Select bits (XT Crystal Oscillator Mode)
+#pragma config POSCMD = XT              // Primary Oscillator Mode Select bits (HS Crystal Oscillator Mode)
 #pragma config OSCIOFNC = OFF           // OSC2 Pin Function bit (OSC2 is clock output)
-#pragma config IOL1WAY = OFF            // Peripheral pin select configuration (Allow multiple reconfigurations)
-#pragma config FCKSM = CSECMD           // Clock Switching Mode bits (Clock switching is enabled,Fail-safe Clock Monitor is disabled)
+#pragma config IOL1WAY = OFF            // Peripheral pin select configuration bit (Allow only one reconfiguration)
+#pragma config FCKSM = CSECMD           // Clock Switching Mode bits (Clock switching is enabled,Fail-safe Clock Monitor is disabled)       
+#pragma config PLLKEN = ON              // PLL Lock Enable Bit (Clock switch to PLL source will wait until the PLL lock signal is valid)
 
 // FWDT
 #pragma config WDTPOST = PS32768        // Watchdog Timer Postscaler bits (1:32,768)
 #pragma config WDTPRE = PR128           // Watchdog Timer Prescaler bit (1:128)
-#pragma config PLLKEN = ON              // PLL Lock Wait Enable bit (Clock switch to PLL source will wait until the PLL lock signal is valid.)
+#pragma config WDTEN = OFF              // Watchdog Timer Enable bit (Watchdog timer enabled/disabled by user software)
 #pragma config WINDIS = OFF             // Watchdog Timer Window Enable bit (Watchdog Timer in Non-Window mode)
-#pragma config FWDTEN = OFF             // Watchdog Timer Enable bit (Watchdog timer enabled/disabled by user software)
+#pragma config WDTWIN = WIN25           // Watchdog Timer Window Select bits (WDT Window is 25% of WDT period)
 
 // FPOR
-#pragma config FPWRT = PWR128           // Power-on Reset Timer Value Select bits (128ms)
-#pragma config BOREN = ON               // Brown-out Reset (BOR) Detection Enable bit (BOR is enabled)
-#pragma config ALTI2C1 = OFF            // Alternate I2C pins for I2C1 (SDA1/SCK1 pins are selected as the I/O pins for I2C1)
 
 // FICD
 #pragma config ICS = PGD1               // ICD Communication Channel Select bits (Communicate on PGEC1 and PGED1)
-#pragma config RSTPRI = PF              // Reset Target Vector Select bit (Device will obtain reset instruction from Primary flash)
 #pragma config JTAGEN = OFF             // JTAG Enable bit (JTAG is disabled)
+#pragma config BTSWP = OFF              // BOOTSWP Instruction Enable/Disable bit (BOOTSWP instruction is disabled)
 
-// FAS
-#pragma config AWRP = OFF               // Auxiliary Segment Write-protect bit (Aux Flash may be written)
-#pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
-#pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled) 
+// FDEVOPT
+#pragma config PWMLOCK = OFF            // PWMx Lock Enable bit (Certain PWM registers may only be written after key sequency)
+#pragma config ALTI2C1 = ON             // Alternate I2C1 Pin bit (I2C1 mapped to ASDA1/ASCL1 pins)
+#pragma config ALTI2C2 = OFF            // Alternate I2C2 Pin bit (I2C2 mapped to SDA2/SCL2 pins)
+#pragma config DBCC = OFF               // DACx Output Cross Connection bit (No Cross Connection between DAC outputs)
 
+// FALTREG
+#pragma config CTXT1 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 1 bits (Not Assigned)
+#pragma config CTXT2 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 2 bits (Not Assigned)
+#pragma config CTXT3 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 2 bits (Not Assigned)
+#pragma config CTXT4 = OFF              // Specifies Interrupt Priority Level (IPL) Associated to Alternate Working Register 2 bits (Not Assigned)
+
+// FBTSEQ
+#pragma config BSEQ = 0xFFF             // Relative value defining which partition will be active after device Reset; the partition containing a lower boot number will be active (Enter Hexadecimal value)
+#pragma config IBSEQ = 0xFFF            // The one's complement of BSEQ; must be calculated by the user and written during device programming. (Enter Hexadecimal value)
 
 void Init_PLL(void)
 {
     // Set up PLL
-    // 8MHz Primary Osc /2 * 40 /2 = FOSC = 80MHz
+    // 12MHz Primary Osc /3 * 40 /2 = FOSC = 80MHz
     // CPU Clock is Fosc /2 = 40MHz (40MIPS)
     PLLFBD = 38;                        // PLL Feedback Divisor Bits M  = 40
     CLKDIVbits.PLLPOST = 0;             // PLL Phase Detector Input Divider N1 = /2
-    CLKDIVbits.PLLPRE = 0;              // PLL VCO Output Divider N2 = /2
+    CLKDIVbits.PLLPRE = 1;              // PLL VCO Output Divider N2 = /3
     OSCTUN = 0;                         // FRC Oscillator Tuning Bits
 
     // Initiate Clock Switch to Primary Oscillator with PLL (NOSC=0x3)
@@ -77,23 +95,10 @@ void Init_PLL(void)
     while (OSCCONbits.COSC != 0x3);     // Wait until Primary Oscillator with PLL
 }
 
-void Init_AUXPLL(void)
-{
-    // Set up Auxiliary Clock for USB
-    // 8MHz Primary OSC / 2 * 24 / 2 = 48MHz
-    ACLKCON3bits.SELACLK = 1;           // Auxiliary PLL provides the source clock for auxiliary clock divider
-    ACLKCON3bits.ASRCSEL = 1;           // Primary oscillator is the clock source for APLL
-    ACLKCON3bits.APLLPOST = 0b110;      // PLL VCO Output Divider - Divide by 2
-    ACLKCON3bits.APLLPRE = 0b001;       // PLL Phase Detector - Divide by 2
-    ACLKDIV3 = 0x7;                     // PLL Feedback Divisor Bits 24
-    ACLKCON3bits.ENAPLL = 1;            // Enable PLL
-    while(ACLKCON3bits.APLLCK != 1);    // Wait for lock
-}
-
 void Init_UART(void)
 {
     __builtin_write_OSCCONL(OSCCON & ~(1<<6));  // Unlock Peripheral Pin Select Registers
-    RPOR0bits.RP64R = 1;                        // Assign UART1 TX to RP64 (RD0)
+    RPOR8bits.RP44R = 1;                        // Assign UART1 TX to RP44 (RB12)
     __builtin_write_OSCCONL(OSCCON | (1<<6));   // Lock Peripheral Pin Select Registers
     
     __C30_UART=1;           // Select UART1 for STDIO

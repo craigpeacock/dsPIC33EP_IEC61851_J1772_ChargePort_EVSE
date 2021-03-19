@@ -1,5 +1,5 @@
 /*
-dsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code
+dsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code
 Copyright (C) 2021 Craig Peacock
 
 This program is free software; you can redistribute it and/or
@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#define FCY 40000000UL
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,45 +31,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "can.h"
 
 int main(void) {
+    TRISCbits.TRISC9 = 0;	
+    TRISCbits.TRISC10 = 0;
+    ANSELCbits.ANSC9 = 0;
+    ANSELCbits.ANSC10 = 0;
     
+    LATCbits.LATC9 = 1;
+    LATCbits.LATC10 = 1;
+       
     Init_PLL();             // Initialise System Clock/PLL
     Init_UART();
     Init_PWM();
     Init_InputCapture();
     Init_CAN1();
     
-    uint8_t buffer[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
-   
-    ANSELE = 0x0;           // Use PORTE as digital IO
-    TRISEbits.TRISE1 = 1;	// E1 is input for InputCapture
-
-    printf("\r\ndsPIC33EP256MU806 IEC61851/SAE J1772 Demo Code\r\n");
+    uint8_t buffer[] = { 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+    
+    printf("\r\ndsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code\r\n");
 
     printf("Generating 1kHz Control Pilot Signal\r\n");
-    
     CP_SetAmps(10.0);
     
     while (1) {
-        //printf("Sending CAN Message\r\n");
-        //CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
+        printf("Sending CAN Message\r\n");
+        CAN1_MessageTransmit(0x1FF, sizeof(buffer), buffer, 0, CAN_MSG_TX_DATA_FRAME);
         
-        if (C1RXFUL1bits.RXFUL8) {
-            uint8_t DLC = ecan1_msgbuf[8][2] & 0xF;
-            uint16_t SID = (ecan1_msgbuf[8][0] >> 2) & 0x7FF;
-            printf("0x%03X [%d] ",SID,DLC);
-
-            uint8_t buffer[8];
-            memcpy(buffer, &ecan1_msgbuf[8][3], DLC);
-
-            int i;
-            for (i = 0; i < DLC; i++)
-                printf("%02X ",buffer[i]);
-            printf("\r\n");
-
-            C1RXFUL1bits.RXFUL8 = 0;
-        }
+        LATCbits.LATC9 = 1;
+        __delay_ms(200);
+        LATCbits.LATC9 = 0;
+        __delay_ms(200);
+        
     }
-    return 0;
 }
 
 
