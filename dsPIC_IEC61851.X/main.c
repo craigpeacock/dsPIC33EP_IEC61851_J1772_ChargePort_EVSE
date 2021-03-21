@@ -38,6 +38,26 @@ enum STATE {
     DISCONNECT
 };
 
+int LockSolenoid(unsigned int lock)
+{
+    if (lock) {
+        // Lock
+        printf("Locking Charge Port\r\n");
+        LOCK_IN_1 = 1;
+        __delay_ms(200);
+        LOCK_IN_1 = 0;
+    } else {
+        // Unlock 
+        printf("Unlocking Charge Port\r\n");
+        LOCK_IN_2 = 1;
+        __delay_ms(200);
+        LOCK_IN_2 = 0;
+    }
+
+    if (UNLOCKED) printf("Unlocked\r\n");
+    else          printf("Locked\r\n");
+}
+
 int main(void) {
    
     // Setup GPIO
@@ -52,13 +72,25 @@ int main(void) {
     
     CHARGE_EN = 0;
     CHARGE_EN_DIR = 0;
-      
+    
+    // Setup Locking Solenoid
+    LOCK_IN_1_DIR = 0;
+    LOCK_IN_2_DIR = 0;
+    LOCK_IN_1 = 0;
+    LOCK_IN_2 = 0;
+    
+    UNLOCKED_DIR = 1;
+    UNLOCKED_ANSEL = 0;   // Digital
+          
     Init_PLL();             
     Init_UART();
     Init_InputCapture();
     Init_CAN1();
    
     printf("\r\ndsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code\r\n");
+    
+    // Unlock Charge Port
+    if (!UNLOCKED) LockSolenoid(0);
     
     unsigned int ChargeRate;
     enum STATE state = IDLE;

@@ -34,6 +34,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define SWCAN_EN        LATAbits.RA1
 
+
+// Locking Solenoid
+
+#define LOCK_IN_1       LATCbits.LATC0
+#define LOCK_IN_2       LATCbits.LATC13
+#define LOCK_IN_1_DIR   TRISCbits.TRISC0
+#define LOCK_IN_2_DIR   TRISCbits.TRISC13
+
+#define UNLOCKED          PORTCbits.RC12
+#define UNLOCKED_DIR      TRISCbits.TRISC12
+#define UNLOCKED_ANSEL    ANSELCbits.ANSC12
+
 void Init_PLL(void);
 void Init_AUXPLL(void);
 void Init_UART(void);
