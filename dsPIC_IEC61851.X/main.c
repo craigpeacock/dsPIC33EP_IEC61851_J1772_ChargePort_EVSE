@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "pwm.h"
 #include "inputcapture.h"
 #include "can.h"
+#include "adc.h"
 
 enum STATE {
     IDLE,
@@ -86,6 +87,7 @@ int main(void) {
     Init_UART();
     Init_InputCapture();
     Init_CAN1();
+    Init_ADC();
    
     printf("\r\ndsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code\r\n");
     
@@ -100,6 +102,11 @@ int main(void) {
         ChargeRate = Get_CP_ChargeRate();
         if (ChargeRate == CP_ERROR) state = ERROR;
         else if (ChargeRate == CP_REQ_DIGITAL_MODE) state = REQ_DIGITAL_COMMS;
+        
+        if (proximity.has_changed) {
+            Get_Proximity(NULL);
+            proximity.has_changed = false;
+        }
         
         switch (state) {
             
