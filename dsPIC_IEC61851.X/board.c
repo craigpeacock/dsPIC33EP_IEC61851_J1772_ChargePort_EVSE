@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <stdio.h>
 #include <stdlib.h>
+#define FCY 40000000UL
 #include <libpic30.h>
 #include "xc.h"
 #include "board.h"
@@ -104,4 +105,58 @@ void Init_UART(void)
     __C30_UART=1;           // Select UART1 for STDIO
     U1BRG = 129;            // Baud Rate 80MHz/2/(16*19200 BPS) - 1
     U1MODEbits.UARTEN = 1;	// Enable UART
+}
+
+void Init_GPIO(void)
+{
+    LED1_ANSEL = 0;
+    LED2_ANSEL = 0;
+
+    LED1 = 0;
+    LED2 = 0;
+        
+    LED1_DIR = 0;
+    LED2_DIR = 0;
+    
+    CHARGE_EN = 0;
+    CHARGE_EN_DIR = 0;
+}
+
+void Init_SOLENOID(void)
+{
+    // Setup Locking Solenoid
+    LOCK_IN_1_DIR = 0;
+    LOCK_IN_2_DIR = 0;
+    LOCK_IN_1 = 0;
+    LOCK_IN_2 = 0;
+    
+    UNLOCKEDSW_DIR = 1;
+    UNLOCKEDSW_ANSEL = 0;   // Digital
+}
+
+int LockSolenoid(unsigned int lock)
+{
+    if (lock) {
+        // Check if we are unlocked
+        if (UNLOCKEDSW) {
+            // Lock
+            printf("Locking Charge Port\r\n");
+            LOCK_IN_1 = 1;
+            __delay_ms(200);
+            LOCK_IN_1 = 0;
+            
+        }
+    } else {
+        // Check if we are locked
+        if (!UNLOCKEDSW) {
+            // Unlock 
+            printf("Unlocking Charge Port\r\n");
+            LOCK_IN_2 = 1;
+            __delay_ms(200);
+            LOCK_IN_2 = 0;
+        }
+    }
+
+    //if (UNLOCKEDSW) printf("LOCK: Unlocked\r\n");
+    //else            printf("LOCK: Locked\r\n");
 }

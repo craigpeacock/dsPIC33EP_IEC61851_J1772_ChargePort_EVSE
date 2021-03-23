@@ -142,7 +142,7 @@ int Get_CP_ChargeRate(void)
     int ChargeRateAmps = 0;
     
     if (control_pilot.period) {
-        printf("CP: Duty Cycle = %.1f%% ", ( control_pilot.t_on * 100.0) / control_pilot.period);
+        printf("CP: Duty cycle = %.1f%% ", ( control_pilot.t_on * 100.0) / control_pilot.period);
         printf("@ %.1fHz \r\n", 1 / ( control_pilot.period * 0.000000025));
     } else {
         printf("CP: No signal present\r\n");

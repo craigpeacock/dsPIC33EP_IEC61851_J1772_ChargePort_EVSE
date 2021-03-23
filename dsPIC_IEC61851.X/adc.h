@@ -20,8 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef XC_ADC_TEMPLATE_H
 #define	XC_ADC_TEMPLATE_H
 
-#include <stdbool.h>
-
 struct PROXIMITY {
     unsigned int raw_value;
     unsigned int previous_value;
