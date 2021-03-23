@@ -46,6 +46,7 @@ int main(void) {
     Init_PLL();
     Init_GPIO();
     Init_UART();
+    Init_TMR4();
     Init_SOLENOID();
     Init_InputCapture();
     Init_CAN1();
@@ -84,6 +85,7 @@ int main(void) {
                     break;
 
                 case S_ERROR:
+                    print_timestamp();
                     printf("Error\r\n");
                     // Handle error here
                     state = S_IDLE;
@@ -91,6 +93,7 @@ int main(void) {
                     
                 case S_REQ_DIGITAL_COMMS:
                     // Request for digital comms on control pilot.
+                    print_timestamp();
                     printf("Requesting digital communication\r\n");
                     // Do nothing at this stage
                     state = S_IDLE;
@@ -98,6 +101,7 @@ int main(void) {
 
                 case S_PWM_CHARGING:
                     LockSolenoid(LOCK);
+                    print_timestamp();
                     printf("Maximum Charge Rate %u.%01uA\r\n", ChargeRate / 100, ChargeRate % 100);
                     // Tell EVSE to deliver power
                     CHARGE_EN = 1;

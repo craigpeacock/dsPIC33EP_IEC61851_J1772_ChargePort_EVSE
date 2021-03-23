@@ -80,6 +80,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma config BSEQ = 0xFFF             // Relative value defining which partition will be active after device Reset; the partition containing a lower boot number will be active (Enter Hexadecimal value)
 #pragma config IBSEQ = 0xFFF            // The one's complement of BSEQ; must be calculated by the user and written during device programming. (Enter Hexadecimal value)
 
+uint16_t ticks;
+uint16_t secs;
+
 void Init_PLL(void)
 {
     // Set up PLL
@@ -140,6 +143,7 @@ int LockSolenoid(unsigned int lock)
         // Check if we are unlocked
         if (UNLOCKEDSW) {
             // Lock
+            print_timestamp();
             printf("Locking Charge Port\r\n");
             LOCK_IN_1 = 1;
             __delay_ms(200);
@@ -150,6 +154,7 @@ int LockSolenoid(unsigned int lock)
         // Check if we are locked
         if (!UNLOCKEDSW) {
             // Unlock 
+            print_timestamp();
             printf("Unlocking Charge Port\r\n");
             LOCK_IN_2 = 1;
             __delay_ms(200);
@@ -160,3 +165,29 @@ int LockSolenoid(unsigned int lock)
     //if (UNLOCKEDSW) printf("LOCK: Unlocked\r\n");
     //else            printf("LOCK: Locked\r\n");
 }
+
+void Init_TMR4(void)
+{
+    // Set-up Timer 4 to trigger every 10mS
+    // 40MHz / 64 (prescaler) / 1000 (PR2) = 1.6mS
+    T4CONbits.TCS = 0;              // Clock from peripheral clock (40MHz)
+    T4CONbits.TCKPS = 0b10;         // 1:64 prescale
+    PR4 = 6250;                     // Trig every 1000 clocks (1.6mS)
+    T4CONbits.TON = 1;              // Turn timer on
+    ticks = 0;
+    secs = 0;
+    IFS1bits.T4IF = 0;              // Clear T3 interrupt flag
+    IPC6bits.T4IP = 1;              // Set interrupt priority as 1
+    IEC1bits.T4IE = 1;              // Enable T3 interrupt       
+}
+
+void __attribute__ ((__interrupt__, no_auto_psv)) _T4Interrupt(void)
+{
+    ticks++;
+    if (ticks == 100) {
+        secs++;
+        ticks = 0;
+    }
+    IFS1bits.T4IF = 0; 
+}
+

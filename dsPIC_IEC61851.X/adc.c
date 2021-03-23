@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdio.h>
 #include <stdbool.h>
 #include "adc.h"
+#include "board.h"
 
 struct PROXIMITY proximity;
 
@@ -127,6 +128,7 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void)
 
 unsigned int Get_Proximity(unsigned int charge_rate)
 {
+    print_timestamp();
     printf("PP: %.02fV ", (((double)proximity.raw_value / 4095) * 3.3 ));
     printf("(ADC_%04d) ",proximity.raw_value);
     

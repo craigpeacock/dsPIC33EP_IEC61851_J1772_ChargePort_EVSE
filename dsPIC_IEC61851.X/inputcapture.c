@@ -141,6 +141,7 @@ int Get_CP_ChargeRate(void)
     unsigned int DutyCycle;
     int ChargeRateAmps = 0;
     
+    print_timestamp()
     if (control_pilot.period) {
         printf("CP: Duty cycle = %.1f%% ", ( control_pilot.t_on * 100.0) / control_pilot.period);
         printf("@ %.1fHz \r\n", 1 / ( control_pilot.period * 0.000000025));

@@ -47,11 +47,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define LOCK            true
 #define UNLOCK          false
 
+extern uint16_t ticks;
+extern uint16_t secs;
+
+#define print_timestamp()   printf("%05d.%02d ", secs, ticks);
+
 void Init_PLL(void);
 void Init_AUXPLL(void);
 void Init_UART(void);
 void Init_GPIO(void);
 void Init_SOLENOID(void);
+void Init_TMR4(void);
 int LockSolenoid(unsigned int lock);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
