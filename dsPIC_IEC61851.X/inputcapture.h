@@ -29,8 +29,14 @@ void __attribute__ ((__interrupt__, no_auto_psv)) _IC2Interrupt(void);
 
 int Get_CP_ChargeRate(void);
 
-extern unsigned int t_on;
-extern unsigned int period;
+struct CONTROL_PILOT {
+    unsigned int t_on;
+    unsigned int period;
+    unsigned int previous_t_on;
+    bool has_changed;
+};
+
+extern struct CONTROL_PILOT control_pilot;
 
 #endif
 

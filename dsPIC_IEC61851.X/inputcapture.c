@@ -23,9 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "board.h"
 #include "inputcapture.h"
 
-unsigned int t_on;
-unsigned int period;
-bool active;
+struct CONTROL_PILOT control_pilot;
 
 void Init_InputCapture(void)
 {
@@ -46,6 +44,11 @@ void Init_InputCapture(void)
      * no divisor. Hence 1 count represents 25nS. The 16 bit register can record 
      * a pulse length of 1.63mS before rolling over.  
      *
+     * We also need to detect loss of pilot signal. The integrated IC timer has 
+     * no ability to interrupt on overflow, so we set up Timer 3 to undertake 
+     * this supervisory function. Timer 3 will overflow in 1.6mS. Each positive 
+     * edge detected will reset Timer 3. If Timer 3 rolls over, this means there 
+     * has been no pilot signal.
      */    
     
     TRISAbits.TRISA4 = 1;           // A4 is input for InputCapture
@@ -72,7 +75,20 @@ void Init_InputCapture(void)
     IC2CON2bits.ICTRIG = 0;         // Operate timer in Sync mode
     IC2CON2bits.SYNCSEL = 0b10000;  // Sync on IC1 event
 
-    active = false;
+    control_pilot.has_changed = false;
+    control_pilot.t_on = 0;
+    control_pilot.period = 0;
+    
+    // Set-up Timer 3 to trigger every 1.6mS if not reset by CP positive edge 
+    // 40MHz / 64 (prescaler) / 1000 (PR2) = 1.6mS
+    T3CONbits.TCS = 0;              // Clock from peripheral clock (40MHz)
+    T3CONbits.TCKPS = 0b10;         // 1:64 prescale
+    PR3 = 1000;                     // Trig every 1000 clocks (1.6mS)
+    T3CONbits.TON = 1;              // Turn timer on
+    IFS0bits.T3IF = 0;              // Clear T3 interrupt flag
+    IPC2bits.T3IP = 1;              // Set interrupt priority as 1
+    IEC0bits.T3IE = 1;              // Enable T3 interrupt    
+
     
     IFS0bits.IC1IF = 0;             // Clear the IC1 interrupt status flag
     IFS0bits.IC2IF = 0;             // Clear the IC2 interrupt status flag
@@ -86,6 +102,7 @@ void __attribute__ ((__interrupt__, no_auto_psv)) _IC1Interrupt(void)
 {
     // Occurs on rising edge, do nothing - wait for full cycle.
     // printf("IC1BUF = 0x%04X\r\n",IC1BUF);
+    TMR3 = 0;           // Reset Timer 3 
     IFS0bits.IC1IF = 0; // Reset respective interrupt flag
 }
 
@@ -94,11 +111,29 @@ void __attribute__ ((__interrupt__, no_auto_psv)) _IC2Interrupt(void)
     // Occurs on falling edge, end of cycle
     // IC1BUF holds duration of positive pulse 
     // IC2BUF holds duration of negative pulse
-    t_on = IC1BUF;
-    period = IC1BUF + IC2BUF;
-    active = true;
+    unsigned int t_on = IC1BUF;
+    
+    // Check if the value has significantly changed since last sample
+    if ((t_on < (control_pilot.t_on - 5)) | (t_on > (control_pilot.t_on + 5))) {
+        control_pilot.t_on = IC1BUF;
+        control_pilot.period = IC1BUF + IC2BUF;
+        control_pilot.has_changed = true;
+    }
 
     IFS0bits.IC2IF = 0; // Reset respective interrupt flag
+}
+
+void __attribute__ ((__interrupt__, no_auto_psv)) _T3Interrupt(void)
+{
+    // No Control Pilot Signal ...
+    
+    if (control_pilot.period) {
+        control_pilot.t_on = 0;
+        control_pilot.period = 0;
+        control_pilot.has_changed = true;
+    }
+    
+    IFS0bits.T3IF = 0; 
 }
 
 int Get_CP_ChargeRate(void)
@@ -106,47 +141,51 @@ int Get_CP_ChargeRate(void)
     unsigned int DutyCycle;
     int ChargeRateAmps = 0;
     
-    //printf("Frequency %.1fHz \r\n", 1 / (period * 0.000000025));
-    //printf("Duty Cycle = %.1f%% ", (t_on * 100.0) / period);
+    if (control_pilot.period) {
+        printf("CP: Duty Cycle = %.1f%% ", ( control_pilot.t_on * 100.0) / control_pilot.period);
+        printf("@ %.1fHz \r\n", 1 / ( control_pilot.period * 0.000000025));
+    } else {
+        printf("CP: No signal present\r\n");
+    }
     
-    if (active) {
-        active = false;
-        // Check period 
-        // IEC 61851 requires 1kHz signal to be within +/- 0.5%
-        // 995Hz = 40201 25nS counts, 1005Hz = 39801 25nS counts
-        if ((period >= 39801) & (period <= 40201)) {
-            // CP Frequency is acceptable, check duty cycle
-            // DutyCycle is in tenths of percent.
-            DutyCycle = (t_on / 40);
-            //printf("Duty Cycle %u\r\n", DutyCycle);
+    // Check period 
+    // IEC 61851 requires 1kHz signal to be within +/- 0.5%
+    // 995Hz = 40201 25nS counts, 1005Hz = 39801 25nS counts
+    if ((control_pilot.period >= 39801) & (control_pilot.period <= 40201)) {
+        // CP Frequency is acceptable, check duty cycle
+        // DutyCycle is in tenths of percent.
+        DutyCycle = (control_pilot.t_on / 40);
+        //printf("Duty Cycle %u\r\n", DutyCycle);
 
-            if (DutyCycle < 30) {
-                // Charging not allowed
-                ChargeRateAmps = CP_ERROR;
-            } else if (DutyCycle < 70) {
-                // Digital Comms
-                ChargeRateAmps = CP_REQ_DIGITAL_MODE;
-            } else if (DutyCycle < 80) {
-                // Charging not allowed
-                ChargeRateAmps = CP_ERROR;
-            } else if (DutyCycle < 100) {
-                ChargeRateAmps = 600;
-            } else if (DutyCycle < 850) {
-                // Available current = (% duty cycle) x 0.6 A
-                ChargeRateAmps = DutyCycle * 6;
-            } else if (DutyCycle < 960) {
-                // Available current = (% duty cycle - 64) x 2.5 A
-                ChargeRateAmps = (DutyCycle - 640) * 25;
-            } else if (DutyCycle < 970) {
-                ChargeRateAmps = 8000;
-            } else {
-                // Over 97%, Charging not allowed
-                ChargeRateAmps = CP_ERROR;
-            }
+        if (DutyCycle < 30) {
+            // Charging not allowed
+            ChargeRateAmps = CP_ERROR;
+        } else if (DutyCycle < 70) {
+            // Digital Comms
+            ChargeRateAmps = CP_REQ_DIGITAL_MODE;
+        } else if (DutyCycle < 80) {
+            // Charging not allowed
+            ChargeRateAmps = CP_ERROR;
+        } else if (DutyCycle < 100) {
+            ChargeRateAmps = 600;
+        } else if (DutyCycle < 850) {
+            // Available current = (% duty cycle) x 0.6 A
+            ChargeRateAmps = DutyCycle * 6;
+        } else if (DutyCycle < 960) {
+            // Available current = (% duty cycle - 64) x 2.5 A
+            ChargeRateAmps = (DutyCycle - 640) * 25;
+        } else if (DutyCycle < 970) {
+            ChargeRateAmps = 8000;
         } else {
-            //printf("Warning: Control Pilot frequency out of spec\r\n");
+            // Over 97%, Charging not allowed
             ChargeRateAmps = CP_ERROR;
         }
-    }
+    } else if (control_pilot.period == 0) {
+        // Loss of CP, stop charging.
+        ChargeRateAmps = 0;
+    } else {
+        printf("Warning: Control Pilot frequency out of spec\r\n");
+        ChargeRateAmps = CP_ERROR;
+    }   
     return (ChargeRateAmps);
 }
