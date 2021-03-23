@@ -73,7 +73,8 @@ void Init_ADC(void)
     
     // Set-up Filter to average last 16 samples
     ADFL0CONbits.MODE = 0b11;           // Averaging Mode
-    ADFL0CONbits.OVRSAM = 0b001;        // x16
+    //ADFL0CONbits.OVRSAM = 0b001;        // x16
+    ADFL0CONbits.OVRSAM = 0b101;        // x64
     ADFL0CONbits.FLCHSEL = 0;           // Channel 0
     _ADFLTR0IF = 0;                     // Clear interrupt flag for ADFLTR0
     _ADFLTR0IE = 1;                     // Enable interrupt for ADFLTR0
@@ -95,9 +96,9 @@ void __attribute__((interrupt, no_auto_psv)) _ADFLTR0Interrupt(void)
     LATBbits.LATB13 = 1;
     
     // Check if the value has significantly changed since last sample
-    if ((ADFL0DAT < (proximity.previous_value - 5)) | (ADFL0DAT > (proximity.previous_value + 5))) {
+    if ((ADFL0DAT < (proximity.previous_value - 20)) | (ADFL0DAT > (proximity.previous_value + 20))) {
         // Value has changed
-        printf("ADFL0DAT %u\r\n", ADFL0DAT);
+        //printf("ADFL0DAT %u\r\n", ADFL0DAT);
         proximity.has_changed = true;
         proximity.raw_value = ADFL0DAT;
     }
@@ -119,12 +120,16 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void)
     _ADCAN0IF = 0;     
 }
 
+#define TOLERANCE_COUNTS    20
+// 20 counts = +/- ~0.5% 
 
-#define PROX_TOLERANCE(raw_value, ideal_value)       (raw_value > ideal_value - 20) & (raw_value < ideal_value + 20) 
+#define PROX_TOLERANCE(raw_value, ideal_value)       (raw_value > (ideal_value - TOLERANCE_COUNTS)) & (raw_value < (ideal_value + TOLERANCE_COUNTS)) 
 
 unsigned int Get_Proximity(unsigned int charge_rate)
 {
-
+    printf("PP: %.02fV ", (((double)proximity.raw_value / 4095) * 3.3 ));
+    printf("(ADC_%04d) ",proximity.raw_value);
+    
     if (proximity.raw_value > 4076) {
         printf("Port unplugged\r\n");
     }
@@ -134,6 +139,7 @@ unsigned int Get_Proximity(unsigned int charge_rate)
     if (PROX_TOLERANCE(proximity.raw_value, 3345)) {
         printf("Tethered cable, release button pressed\r\n");
     }
+    //We are unable to detect 13A cable as we clip values above 3.3V...
     //if (PROX_TOLERANCE(proximity.raw_value, 4095)) {
     //    printf("13A detachable cable detected\r\n");
     //}
