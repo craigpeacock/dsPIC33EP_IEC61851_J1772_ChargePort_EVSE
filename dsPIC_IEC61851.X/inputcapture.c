@@ -112,11 +112,14 @@ void __attribute__ ((__interrupt__, no_auto_psv)) _IC2Interrupt(void)
     // IC1BUF holds duration of positive pulse 
     // IC2BUF holds duration of negative pulse
     unsigned int t_on = IC1BUF;
+    unsigned int period = IC1BUF + IC2BUF;
     
     // Check if the value has significantly changed since last sample
-    if ((t_on < (control_pilot.t_on - 5)) | (t_on > (control_pilot.t_on + 5))) {
+    if ((t_on < (control_pilot.t_on - 5)) | (t_on > (control_pilot.t_on + 5)) |
+        (period < (control_pilot.period - 5)) | (period > (control_pilot.period + 5))) {
         control_pilot.t_on = IC1BUF;
         control_pilot.period = IC1BUF + IC2BUF;
+        
         control_pilot.has_changed = true;
     }
 
