@@ -144,7 +144,7 @@ int LockSolenoid(unsigned int lock)
         if (UNLOCKEDSW) {
             // Lock
             print_timestamp();
-            printf("Locking Charge Port\r\n");
+            printf("Locking charge port\r\n");
             LOCK_IN_1 = 1;
             __delay_ms(200);
             LOCK_IN_1 = 0;
@@ -155,7 +155,7 @@ int LockSolenoid(unsigned int lock)
         if (!UNLOCKEDSW) {
             // Unlock 
             print_timestamp();
-            printf("Unlocking Charge Port\r\n");
+            printf("Unlocking charge port\r\n");
             LOCK_IN_2 = 1;
             __delay_ms(200);
             LOCK_IN_2 = 0;

@@ -102,7 +102,7 @@ int main(void) {
                 case S_PWM_CHARGING:
                     LockSolenoid(LOCK);
                     print_timestamp();
-                    printf("Maximum Charge Rate %u.%01uA\r\n", ChargeRate / 100, ChargeRate % 100);
+                    printf("Maximum charge rate %u.%01uA\r\n", ChargeRate / 100, ChargeRate % 100);
                     // Tell EVSE to deliver power
                     CHARGE_EN = 1;
                     // Communicate with our charger here
