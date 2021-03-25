@@ -121,8 +121,9 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void)
     _ADCAN0IF = 0;     
 }
 
-#define TOLERANCE_COUNTS    20
+#define TOLERANCE_COUNTS    40
 // 20 counts = +/- ~0.5% 
+// 40 counts = +/- ~ 1%
 
 #define PROX_TOLERANCE(raw_value, ideal_value)       (raw_value > (ideal_value - TOLERANCE_COUNTS)) & (raw_value < (ideal_value + TOLERANCE_COUNTS)) 
 
