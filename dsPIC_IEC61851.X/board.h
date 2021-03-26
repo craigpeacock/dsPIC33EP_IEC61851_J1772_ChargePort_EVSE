@@ -32,7 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define CHARGE_EN       LATAbits.LATA3
 #define CHARGE_EN_DIR   TRISAbits.TRISA3
 
-#define SWCAN_EN        LATAbits.RA1
+#define SWCAN_EN        LATAbits.LATA1
+#define SWCAN_EN_DIR    TRISAbits.TRISA1
+#define SWCAN_EN_ANSEL  ANSELAbits.ANSA1
 
 // Locking Solenoid
 #define LOCK_IN_1       LATCbits.LATC0

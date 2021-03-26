@@ -123,6 +123,12 @@ void Init_GPIO(void)
     
     CHARGE_EN = 0;
     CHARGE_EN_DIR = 0;
+    
+    SWCAN_EN = 0;
+    SWCAN_EN_ANSEL = 0;
+    SWCAN_EN_DIR = 0;
+    
+            
 }
 
 void Init_SOLENOID(void)
