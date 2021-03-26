@@ -45,9 +45,23 @@ void Init_CAN1(void)
     C1CTRL1bits.REQOP = 4;                      // Request configuration mode
     while( C1CTRL1bits.OPMODE != 4 );           // Check operation mode 
        
-    // Set ECAN module for 250kbps speed with 10 Tq per bit
-    C1CFG1 = 0x47;                              // BRP = 8 SJW = 2 Tq
-    C1CFG2 = 0x2D2;
+    // Baud Rate Prescaler bits:
+    //C1CFG1bits.BRP = 0;                 //   1M Baud TQ = 2x1x1/FCAN 
+    C1CFG1bits.BRP = 1;                   // 500K Baud TQ = 2x2x1/FCAN
+    //C1CFG1bits.BRP = 3;                 // 250K Baud TQ = 2x4x1/FCAN
+    //C1CFG1bits.BRP = 29;                //33.3K Baud TQ = 2x30x1/FCAN
+    
+    //TQ = Sync (1) + PRSEG (5) + SEG1PH (8) + SEG2PH (6) = 20  
+    C1CFG2bits.SAM = 1;                 // Bus line is sampled 3 times at sample point
+    C1CFG2bits.SEG2PHTS = 1;            // PS2 is freely programmable
+    // Synchronization Jump Width bits:
+    C1CFG1bits.SJW = 3;                 // Length is 4 x TQ
+    // Propagation Time Segment bits:
+    C1CFG2bits.PRSEG = 4;               // Length is 5 x TQ
+    // Phase Segment 1 bits:
+    C1CFG2bits.SEG1PH = 7;              // Length is 8 x TQ
+    // Phase Segment 2 bits:
+    C1CFG2bits.SEG2PH = 5;              // Length is 6 x TQ
     
     // Transmit
     // Set up DMA
