@@ -28,9 +28,15 @@ typedef enum
 
 #define NUM_OF_CAN_BUFFERS 32
 
+#define TX_MSG_HIGH_PRIORITY                0b11
+#define TX_MSG_INTERMEDIATE_HIGH_PRIORITY   0b10
+#define TX_MSG_INTERMEDIATE_LOW_PRIORITY    0b01
+#define TX_MSG_LOW_PRIORITY                 0b00
+
 extern unsigned int ecan1_msgbuf[NUM_OF_CAN_BUFFERS][8] __attribute__((aligned(NUM_OF_CAN_BUFFERS * 16)));
 
 void Init_CAN1(void);
+void CAN_Print_Frame(uint16_t frame[]);
 void CAN1_MessageTransmit(uint32_t messageID, uint8_t DLC, uint8_t* message, uint8_t fifoNum, CAN_MSG_TX_ATTRIBUTE msgAttr);
 
 #endif
