@@ -60,7 +60,7 @@ void Init_UART(void);
 void Init_GPIO(void);
 void Init_SOLENOID(void);
 void Init_TMR4(void);
-int LockSolenoid(unsigned int lock);
+void LockSolenoid(unsigned int lock);
 
 #endif	/* XC_HEADER_TEMPLATE_H */
 

@@ -143,7 +143,7 @@ void Init_SOLENOID(void)
     UNLOCKEDSW_ANSEL = 0;   // Digital
 }
 
-int LockSolenoid(unsigned int lock)
+void LockSolenoid(unsigned int lock)
 {
     if (lock) {
         // Check if we are unlocked
