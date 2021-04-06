@@ -73,7 +73,7 @@ void Init_CAN1(void)
     DMA0CONbits.DIR = 0x1;              // Direction: Device RAM to peripheral
     DMA0CONbits.AMODE = 0x2;            // Peripheral indirect addressing mode
     DMA0CONbits.MODE = 0x0;             // Continuous, ping-pong disabled
-    DMA0REQ = 0b01000110;               // ECAN1 - TX Data Request
+    DMA0REQ = 0x46;                     // ECAN1 - TX Data Request
     DMA0CNT = 7;                        // 8 words per DMA transfer
     DMA0PAD = (volatile unsigned int)&C1TXD;    // Peripheral register
     DMA0STAL = (unsigned int) &ecan1_msgbuf;    // Device RAM address 
@@ -98,7 +98,7 @@ void Init_CAN1(void)
     DMA1CONbits.DIR = 0x0;              // Direction: Peripheral to Device RAM
     DMA1CONbits.AMODE = 0x2;            // Peripheral indirect addressing mode
     DMA1CONbits.MODE = 0x0;             // Continuous, ping-pong disabled
-    DMA1REQ = 34;                       // ECAN1 - RX 
+    DMA1REQ = 0x22;                     // ECAN1 - RX 
     DMA1CNT = 7;                        // 8 words per DMA transfer    
     DMA1PAD = (volatile unsigned int)&C1RXD;    // Peripheral register
     DMA1STAL = (unsigned int) &ecan1_msgbuf;    // Device RAM address 
