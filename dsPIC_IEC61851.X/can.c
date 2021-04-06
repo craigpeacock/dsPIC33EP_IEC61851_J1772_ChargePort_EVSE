@@ -210,6 +210,7 @@ void CAN_Print_Frame(uint16_t frame[])
     uint8_t DLC = frame[2] & 0xF;
     uint8_t *data = (uint8_t *)&frame[3];
           
+    print_timestamp();
     printf("0x%03X [%d] ", SID, DLC);
 
     if (frame[0] & 0x02) {

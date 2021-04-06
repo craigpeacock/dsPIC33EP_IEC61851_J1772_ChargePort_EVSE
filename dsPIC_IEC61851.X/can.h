@@ -36,7 +36,9 @@ typedef enum
 extern unsigned int ecan1_msgbuf[NUM_OF_CAN_BUFFERS][8] __attribute__((aligned(NUM_OF_CAN_BUFFERS * 16)));
 
 void Init_CAN1(void);
+void Init_SWCAN2(void);
 void CAN_Print_Frame(uint16_t frame[]);
 void CAN1_MessageTransmit(uint32_t messageID, uint8_t DLC, uint8_t* message, uint8_t fifoNum, CAN_MSG_TX_ATTRIBUTE msgAttr);
+void CAN2_MessageTransmit(uint32_t messageID, uint8_t DLC, uint8_t* message, uint8_t fifoNum, CAN_MSG_TX_ATTRIBUTE msgAttr);
 
 #endif

@@ -32,10 +32,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "can.h"
 #include "adc.h"
 
+#define ENABLE_SWCAN
+
 enum STATE {
     S_IDLE,
     S_ERROR,
     S_REQ_DIGITAL_COMMS,
+    S_DIGITAL_COMMS,
     S_PWM_CHARGING,
     S_DISCONNECT,
     S_UNLOCK
@@ -49,7 +52,8 @@ int main(void) {
     Init_TMR4();
     Init_SOLENOID();
     Init_InputCapture();
-    Init_CAN1();
+    //Init_CAN1();
+    Init_SWCAN2();
     Init_ADC();
    
     printf("\r\ndsPIC33EP128GS804 IEC61851/SAE J1772 Demo Code\r\n");
@@ -70,7 +74,7 @@ int main(void) {
                 proximity.has_changed = false;
             }
 
-            if (control_pilot.has_changed) {
+            if (control_pilot.has_changed & (state != S_DIGITAL_COMMS)) {
                 ChargeRate = Get_CP_ChargeRate();
                 if (ChargeRate == CP_ERROR) state = S_ERROR;
                 if (ChargeRate == CP_REQ_DIGITAL_MODE) state = S_REQ_DIGITAL_COMMS;
@@ -96,8 +100,20 @@ int main(void) {
                     // Request for digital comms on control pilot.
                     print_timestamp();
                     printf("Requesting digital communication\r\n");
+#ifdef ENABLE_SWCAN
+                    CHARGE_EN = 1;
+                    __delay_ms(100);
+                    print_timestamp();
+                    printf("Enabling SWCAN Interface\r\n");
+                    SWCAN_EN = 1;
+                    state = S_DIGITAL_COMMS;
+#else
                     // Do nothing at this stage
                     state = S_IDLE;
+#endif
+                    break;
+                    
+                case S_DIGITAL_COMMS:
                     break;
 
                 case S_PWM_CHARGING:
