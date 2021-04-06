@@ -58,6 +58,7 @@ int main(void) {
     if (!UNLOCKEDSW) LockSolenoid(UNLOCK);
     
     int ChargeRate;
+    int CableRate;
     enum STATE state = S_IDLE;
     
     while (1) {
@@ -65,7 +66,7 @@ int main(void) {
         if (proximity.has_changed | control_pilot.has_changed) {
         
             if (proximity.has_changed) {
-                Get_Proximity(NULL);
+                CableRate = Get_Proximity();
                 proximity.has_changed = false;
             }
 
@@ -102,7 +103,9 @@ int main(void) {
                 case S_PWM_CHARGING:
                     LockSolenoid(LOCK);
                     print_timestamp();
-                    printf("Maximum charge rate %u.%01uA\r\n", ChargeRate / 100, ChargeRate % 100);
+                    printf("Maximum charge rate %u.%01uA ", ChargeRate / 100, ChargeRate % 100);
+                    if (CableRate > 0) printf("(Cable rated to %dA) ",CableRate);
+                    printf("\r\n");
                     // Tell EVSE to deliver power
                     CHARGE_EN = 1;
                     // Communicate with our charger here

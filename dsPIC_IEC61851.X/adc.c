@@ -127,7 +127,7 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void)
 
 #define PROX_TOLERANCE(raw_value, ideal_value)       (raw_value > (ideal_value - TOLERANCE_COUNTS)) & (raw_value < (ideal_value + TOLERANCE_COUNTS)) 
 
-unsigned int Get_Proximity(unsigned int charge_rate)
+int Get_Proximity(void)
 {
     print_timestamp();
     printf("PP: %.02fV ", (((double)proximity.raw_value / 4095) * 3.3 ));
@@ -135,27 +135,37 @@ unsigned int Get_Proximity(unsigned int charge_rate)
     
     if (proximity.raw_value > 4076) {
         printf("Port unplugged\r\n");
+        return(PP_UNPLUGGED);
     }
     if (PROX_TOLERANCE(proximity.raw_value, 1868)) {
         printf("Tethered cable attached\r\n");
+        return(PP_TETHERED);
     }
     if (PROX_TOLERANCE(proximity.raw_value, 3345)) {
         printf("Tethered cable, release button pressed\r\n");
+        return(PP_RELEASE);
     }
     //We are unable to detect 13A cable as we clip values above 3.3V...
     //if (PROX_TOLERANCE(proximity.raw_value, 4095)) {
     //    printf("13A detachable cable detected\r\n");
+    //    return(13);
     //}
     if (PROX_TOLERANCE(proximity.raw_value, 3861)) {
         printf("20A detachable cable detected\r\n");
+        return(20);
     }
     if (PROX_TOLERANCE(proximity.raw_value, 2367)) {
         printf("32A detachable cable detected\r\n");
+        return(32);
     }
     if (PROX_TOLERANCE(proximity.raw_value, 1403)) {
         printf("63A detachable cable detected\r\n");
+        return(63);
     }
     if (PROX_TOLERANCE(proximity.raw_value, 804)) {
         printf("80A detachable cable detected\r\n");
+        return(80);
     }
+    printf("Unknown state\r\n");
+    return(PP_ERROR);
 }

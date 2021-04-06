@@ -29,7 +29,12 @@ struct PROXIMITY {
 extern struct PROXIMITY proximity;
 
 void Init_ADC(void);
-unsigned int Get_Proximity(unsigned int charge_rate);
+int Get_Proximity(void);
+
+#define PP_ERROR        -1
+#define PP_UNPLUGGED    -2
+#define PP_TETHERED     -3
+#define PP_RELEASE      -4
 
 #endif	
 
