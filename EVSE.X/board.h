@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Contactor Outputs
 #define OUT1            LATCbits.LATC6
 #define OUT1_DIR        TRISCbits.TRISC6
+#define OUT1_ANSEL      ANSELCbits.ANSC6
 
 #define OUT2            LATBbits.LATB12
 #define OUT2_DIR        TRISBbits.TRISB12

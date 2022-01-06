@@ -68,20 +68,24 @@ int8_t DiodeCheck(void)
 
 void EnablePower(void)
 {
-    LockSolenoid(LOCK);
-    __delay_ms(100);  
-    OUT1 = 1;   // Enable Power
-    print_timestamp();
-    printf("Power Enabled\r\n");  
+    if (OUT1 == 0) {
+        LockSolenoid(LOCK);
+        __delay_ms(100);  
+        OUT1 = 1;   // Enable Power
+        print_timestamp();
+        printf("Power Enabled\r\n");  
+    }
 }
 
 void DisablePower(void)
 {
-    OUT1 = 0;   // Disable Power
-    print_timestamp();
-    printf("Power Disabled\r\n");  
-    __delay_ms(100);  
-    LockSolenoid(UNLOCK);
+    if (OUT1 == 1) {
+        OUT1 = 0;   // Disable Power
+        print_timestamp();
+        printf("Power Disabled\r\n");  
+        __delay_ms(100);  
+        LockSolenoid(UNLOCK);
+    }
 }
 
 int main(void) {
@@ -105,6 +109,7 @@ int main(void) {
             case STATE_A:
                 print_timestamp();
                 printf("Ready, no Vehicle Detected\r\n");
+                DisablePower();
                 CP_Set(HIGH);      
                 __delay_ms(5);
                 state = STATE_A_LOOP;
@@ -124,6 +129,7 @@ int main(void) {
             case STATE_B:
                 print_timestamp();
                 printf("Vehicle Detected\r\n");
+                DisablePower();
                 if (DiodeCheck()) {
                     state = STATE_E;
                     break;

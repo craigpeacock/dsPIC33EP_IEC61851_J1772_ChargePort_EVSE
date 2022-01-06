@@ -131,6 +131,7 @@ void Init_GPIO(void)
     SWCAN_EN_DIR = 0;
     
     OUT1_DIR = 0;
+    OUT1_ANSEL = 0;
     OUT1 = 0;
 }
 
