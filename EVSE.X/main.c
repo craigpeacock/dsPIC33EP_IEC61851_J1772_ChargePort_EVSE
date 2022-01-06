@@ -134,6 +134,7 @@ int main(void) {
                     state = STATE_E;
                     break;
                 }
+                CP_Set(charge_rate);
                 state = STATE_B_LOOP;
             case STATE_B_LOOP:
                 n = CP_ReadAN(); 
