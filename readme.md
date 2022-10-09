@@ -2,8 +2,8 @@
 
 Source code intended for IEC61851/J1772 ChargePort Controller:
 
-* [IEC61851 / J1772 Electric Vehicle Charge Controller](https://www.beyondlogic.org/iec61851-j1772-electric-vehicle-charge-controller)
-* [Prototype IEC61851 / J1772 EVSE Interface](https://www.beyondlogic.org/prototype-iec61851-j1772-evse-interface)
+* [IEC61851 / J1772 Electric Vehicle Charge Controller (EVCC)](https://www.beyondlogic.org/iec61851-j1772-electric-vehicle-charge-controller)
+* [IEC61851 / J1772 Electric Vehicle Supply Equipment (EVSE) Interface](https://www.beyondlogic.org/prototype-iec61851-j1772-evse-interface)
 
 ## Example output connected to Tesla UMC.  
 
